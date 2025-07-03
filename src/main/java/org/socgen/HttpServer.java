@@ -20,8 +20,8 @@ public class HttpServer
         ConfigurationManager.getInstance().loadConfigurationFile("src/main/resources/http.json");
         Configuration conf = ConfigurationManager.getInstance().getCurrentConfiguration();
 
-        LOGGER.info("Server started at port : " + conf.getPort());
-        LOGGER.info("Server started at webRoot : " + conf.getWebroot());
+        LOGGER.info("Server started at port : {}", conf.getPort());
+        LOGGER.info("Server started at webRoot : {}", conf.getWebroot());
 
         ServerListenerThread serverListenerThread = new ServerListenerThread(conf.getPort(), conf.getWebroot());
         serverListenerThread.start();

@@ -25,32 +25,18 @@ public class ServerListenerThread extends Thread{
 
     @Override
     public void run() {
-        while (true){
-            try {
+        try {
+            while (serverSocket.isBound() && !serverSocket.isClosed()){
                 Socket socket = serverSocket.accept();
+                LOGGER.info("Connection accepted : {}", socket.getPort());
 
-                LOGGER.info("Connection accepted : " + socket.getPort());
+                HttpConnectionWorkerThread httpConnectionWorkerThread = new HttpConnectionWorkerThread(socket);
+                httpConnectionWorkerThread.start();
 
-                InputStream inputStream = socket.getInputStream();
-                OutputStream outputStream = socket.getOutputStream();
-
-                String html = "<html><head><title>NTNMK</title></head><body><h2>Hey this webpage is served by my http socket code</h2></body></html>";
-                final String CRLF = "\n\r";
-
-                String response = "HTTP/1.1 200 OK" + CRLF +
-                        "Content-Length: " + html.getBytes().length + CRLF +
-                        CRLF +
-                        html +
-                        CRLF + CRLF;
-
-                outputStream.write(response.getBytes());
-                socket.close();
-//                serverSocket.close();
-                inputStream.close();
-                outputStream.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
+
