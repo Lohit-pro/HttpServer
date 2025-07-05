@@ -2,6 +2,7 @@ package org.socgen.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.socgen.http.HttpRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +36,12 @@ public class ServerListenerThread extends Thread{
 
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("Problem with starting thread" ,e);
+        } finally {
+            try {
+                if (serverSocket != null)
+                    serverSocket.close();
+            } catch (IOException e) {}
         }
     }
 }

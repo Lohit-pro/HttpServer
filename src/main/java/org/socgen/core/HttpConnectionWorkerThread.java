@@ -9,7 +9,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 public class HttpConnectionWorkerThread extends Thread{
-    private Logger LOGGER = LoggerFactory.getLogger(HttpConnectionWorkerThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpConnectionWorkerThread.class);
     private Socket socket;
 
     public HttpConnectionWorkerThread(Socket socket) {
@@ -18,12 +18,22 @@ public class HttpConnectionWorkerThread extends Thread{
 
     @Override
     public void run() {
+
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+
         try {
-            InputStream inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+
+            int _byte;
+
+            while ((_byte = inputStream.read()) != -1) {
+                System.out.print((char)_byte);
+            }
 
             String html = "<html><head><title>HttpServer</title></head><body><h2>Hey this webpage is served by my http socket code</h2></body></html>";
-            final String CRLF = "\n\r";
+            final String CRLF = "\r\n";
 
             String response = "HTTP/1.1 200 OK" + CRLF +
                     "Content-Length: " + html.getBytes().length + CRLF +
@@ -32,10 +42,8 @@ public class HttpConnectionWorkerThread extends Thread{
                     CRLF + CRLF;
 
             outputStream.write(response.getBytes());
-            socket.close();
-//            serverSocket.close();
-            inputStream.close();
-            outputStream.close();
+
+            LOGGER.info("Connection processed successfully!");
 
             try {
                 sleep(5000);
@@ -43,10 +51,23 @@ public class HttpConnectionWorkerThread extends Thread{
                 throw new RuntimeException(e);
             }
 
-            LOGGER.info("Connection processed successfully!");
         } catch (IOException e) {
+            LOGGER.error("Exception Occurred.", e);
             throw new RuntimeException(e);
-            // TODO Handle later
+        } finally {
+            try {
+                if (socket != null)
+                    socket.close();
+
+                if (inputStream != null)
+                    inputStream.close();
+
+                if (outputStream != null)
+                    outputStream.close();
+
+            } catch (IOException e) {
+                LOGGER.debug("Error at closing socket");
+            }
         }
     }
 }
